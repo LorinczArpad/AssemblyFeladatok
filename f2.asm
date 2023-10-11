@@ -1,87 +1,174 @@
-.model small
-.data
-    ertek db '*****$'             ; Buffer to store user input (up to 5 characters)
-    hiba db 'Nem megengedett karakter!$' ; Error message for non-numeric input
-    uzenet db 'Vege a bevitelnek$'     ; Message for the end of input
 
-.code
-start:
-    mov ax, @data           ; Initialize DS with the address of data segment
-    mov ds, ax
+Code Segment
+	                  assume CS:Code, DS:Data, SS:Stack
+	Start:            
+	                  mov    ax, Code
+	                  mov    ds, ax
+	;mov di, offset ertek
+	;mov ax, 03
+	;int 10h
 
-    mov di, offset ertek    ; Initialize DI with the address of ertek buffer
+	                  mov    ah, 09
+	                  mov    dx, offset welcomem
+	                  int    21h
+	
+	
+	
+	
+	Bevitel:          
+	                  xor    ax, ax
+	                  int    16h
+	                  mov    bx,ax
+	
+	                  mov    ax, 03
+	                  int    10h
+	
 
-    mov ax, 0003h           ; Set video mode 80x25, 16 colors
-    int 10h                 ; Call BIOS video interrupt
+	
+	                  mov    ax,bx
+	                  cmp    al, 27
+	                  jz     Program_vege_Gate
+	
+	
+	                  mov    cx, 10
+	                  mov    ah, '0'
+	Vizsg:            
+	;0 at nem fogad el elsore
+	                  cmp    cx, 10
+	                  jz     nck
+	nck:              
+	                  cmp    al, '0'
+	                  jz     HibaK
+	                  cmp    al, ah
+	                  jz     Tarol
+	                  inc    ah
+	                  loop   Vizsg
+	                  jmp    HibaK
+	
+	HibaK:            
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 10
+	                  mov    dl, 5
+	                  int    10h
+	                  mov    dx, offset hiba
+	                  mov    ah, 09
+	                  int    21h
+	
+	
+	                  jmp    Bevitel
+	Program_vege_Gate:
+	                  jmp    Program_vege
+	Tarol:            
+	                  mov    [di], al
+	                  inc    di
+	                  mov    al, '$'
+	                  mov    [di], al
+	
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 5
+	                  mov    dl, 28
+	                  int    10h
+	                  mov    dx, offset ertek
+	                  mov    ah, 09
+	                  int    21h
+	                  mov    ax, offset ertek
+	                  add    ax, 4
+	                  cmp    ax, di
+	                  jnz    Bevitel
+	
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 7
+	                  mov    dl, 0
+	                  int    10h
+	
+	                  mov    dx, offset welcomem
+	                  mov    ah, 09h
+	                  int    21h
+	Bevitel2:         
+	                  xor    ax, ax
+	                  int    16h
+	                  mov    bx,ax
+	
+	                  mov    ax, 03
+	                  int    10h
+	
 
-Bevitel:
-    xor ax, ax              ; Clear AX
-    int 16h                 ; BIOS keyboard input
-
-    mov bx, ax              ; Store the input in BX
-
-    mov ax, 0003h           ; Restore video mode (clear screen)
-    int 10h                 ; Call BIOS video interrupt
-
-    mov ax, bx              ; Move the input from BX to AX
-    cmp al, 27              ; Check if the input is ESC (ASCII 27)
-    jz Program_vege         ; If ESC, jump to Program_vege
-
-    mov cx, 10              ; Initialize CX with 10 for the loop
-    mov ah, '0'             ; Initialize AH with '0'
-
-Vizsg:
-    cmp al, ah              ; Compare AL (input) with AH ('0')
-    jz Tarol                ; If equal, jump to Tarol
-    inc ah                  ; Increment AH
-    loop Vizsg              ; Loop until CX becomes zero
-
-    mov ah, 02h             ; Set up for BIOS video write
-    mov bh, 0               ; Page number (0 for standard video memory)
-    mov dh, 10              ; Row (vertical position)
-    mov dl, 0               ; Column (horizontal position)
-    int 10h                 ; Call BIOS video interrupt
-
-    mov dx, offset hiba     ; DX points to the hiba message
-    mov ah, 09h             ; Set up for displaying a string
-    int 21h                 ; Call DOS interrupt to display error message
-
-    jmp Bevitel             ; Jump back to Bevitel for another input
-
-Tarol:
-    mov [di], al            ; Store the numerical character in the buffer
-    inc di                  ; Increment DI to point to the next position
-    mov al, '$'             ; Put '$' to terminate the string
-    mov [di], al
-    mov ah, 02h             ; Set up for BIOS video write
-    mov bh, 0               ; Page number
-    mov dh, 5               ; Row
-    mov dl, 28              ; Column
-    int 10h                 ; Call BIOS video interrupt
-
-    mov dx, offset ertek    ; DX points to the ertek buffer
-    mov ah, 09h             ; Set up for displaying a string
-    int 21h                 ; Call DOS interrupt to display entered value
-
-    mov ax, offset ertek    ; Load AX with the address of ertek
-    add ax, 4               ; Move AX to the end of the buffer
-    cmp ax, di              ; Compare AX with DI to check if all four values are entered
-    jnz Bevitel             ; If not, continue input
-
-    mov ah, 02h             ; Set up for BIOS video write
-    mov bh, 0               ; Page number
-    mov dh, 7               ; Row
-    mov dl, 0               ; Column
-    int 10h                 ; Call BIOS video interrupt
-
-    mov dx, offset uzenet   ; DX points to the uzenet message
-    mov ah, 09h             ; Set up for displaying a string
-    int 21h                 ; Call DOS interrupt to display the end message
-
-Program_vege:
-    mov ah, 4Ch             ; Terminate program with return code 0
-    int 21h                 ; Call DOS interrupt
-
+	
+	                  mov    ax,bx
+	                  cmp    al, 27
+	                  jz     Program_vege
+	
+	
+	                  mov    cx, 10
+	                  mov    ah, '0'
+	Vizsg2:           
+	;0 at nem fogad el elsore
+	                  cmp    cx, 10
+	                  jz     nck2
+	nck2:             
+	                  cmp    al, '0'
+	                  jz     HibaK2
+	                  cmp    al, ah
+	                  jz     Tarol2
+	                  inc    ah
+	                  loop   Vizsg2
+	                  jmp    HibaK2
+	
+	HibaK2:           
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 10
+	                  mov    dl, 5
+	                  int    10h
+	                  mov    dx, offset hiba
+	                  mov    ah, 09
+	                  int    21h
+	
+	
+	                  jmp    Bevitel2
+	
+	Tarol2:           
+	                  mov    [di], al
+	                  inc    di
+	                  mov    al, '$'
+	                  mov    [di], al
+	
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 5
+	                  mov    dl, 28
+	                  int    10h
+	                  mov    dx, offset ertek2
+	                  mov    ah, 09
+	                  int    21h
+	
+	                  mov    ax, offset ertek2
+	                  add    ax, 4
+	                  cmp    ax, di
+	                  jnz    Bevitel2
+	
+	
+	                  mov    ah, 02h
+	                  mov    bh, 0
+	                  mov    dh, 7
+	                  mov    dl, 0
+	                  int    10h
+	
+	                  mov    dx, offset uzenet
+	                  mov    ah, 09h
+	                  int    21h
+	Program_vege:     
+	                  mov    ax, 4c00h
+	                  int    21h
+	ertek:            db     '****$'
+	ertek2:           db     '****$'
+	hiba:             db     'Nem megengedett karakter!$'
+	uzenet:           db     'Vege a bevitelnek$'
+	welcomem:         db     'Adjon meg egy szamot$'
 Code Ends
-End Start
 
+Data Segment
+Data Ends
